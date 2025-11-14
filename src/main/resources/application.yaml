@@ -6,10 +6,6 @@ eureka:
     service-url:
       default-zone: http://localhost:8761/eureka
 
-spring:
-  application:
-    name: gateway
-
 cloud:
   gateway:
     routes:
@@ -17,3 +13,33 @@ cloud:
         uri: lb://user-service
         predicates:
           - Path=/api/users/**
+
+app:
+  config:
+    keycloak:
+      url: http://localhost:8571/
+      realm: banking-service
+
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            token-uri: ${app.config.keycloak.url}/realms/${app.config.keycloak.realm}/protocol/openid-connect/token
+            authorization-uri: ${app.config.keycloak.url}/realms/${app.config.keycloak.realm}/protocol/openid-connect/auth
+            user-name-attribute: preferred_username
+            user-info-uri: ${app.config.keycloak.url}/realms/${app.config.keycloak.realm}/protocol/openid-connect/userinfo
+            jwk-set-uri: ${app.config.keycloak.url}/realms/${app.config.keycloak.realm}/protocol/openid-connect/certs
+            user-info-authentication-method: header
+        registration:
+          banking-service-client:
+            provider: keycloak
+            client-id: banking-service-client
+            client-secret: Au6eAD2JgB5MH0G2tNrPLfKqObswfSPb
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8571/login/oauth2/code/keycloak
+            scope: openid
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${app.config.keycloak.url}/realms/${app.config.keycloak.realm}/protocol/openid-connect/certs
