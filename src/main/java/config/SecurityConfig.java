@@ -12,18 +12,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http
-                .authorizeExchange()
-                //ALLOWING REGISTER API FOR DIRECT ACCESS
-                .pathMatchers("/api/users/register").permitAll()
-                //ALL OTHER APIS ARE AUTHENTICATED
-                .anyExchange().authenticated()
-                .and()
-                .csrf().disable()
-                .oauth2Login()
-                .and()
-                .oauth2ResourceServer()
-                .jwt();
-        return http.build();
+        return http
+                .authorizeExchange(exchanges -> exchanges
+                        // ALLOWING REGISTER API FOR DIRECT ACCESS
+                        .pathMatchers("/api/users/register").permitAll()
+                        // ALL OTHER APIS ARE AUTHENTICATED
+                        .anyExchange().authenticated()
+                )
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .oauth2Login(oauth2Login -> {
+                    // Customize oauth2Login if needed
+                })
+                .oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer
+                        .jwt(jwt -> {
+                            // Customize JWT if needed
+                        })
+                )
+                .build();
     }
 }
